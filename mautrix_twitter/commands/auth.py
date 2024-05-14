@@ -79,6 +79,36 @@ async def enter_login_cookies(evt: CommandEvent) -> None:
     await evt.reply(f"Successfully logged in as @{evt.sender.username}")
     evt.sender.command_status = None
 
+@command_handler(
+    needs_auth=False,
+    management_only=True,
+    help_section=SECTION_AUTH,
+    help_text="Log in to Twitter (one-step)",
+)
+async def login_tokens(evt: CommandEvent) -> None:
+    if evt.sender.client:
+        await evt.reply("You're already logged in")
+        return
+
+    if len(evt.args) < 2:
+        await evt.reply("You supplied: " + str(evt.args))
+        await evt.reply("Usage: login-tokens [auth_token] [ct0]")
+        return
+
+    try:
+        await evt.reply("You supplied: " + str(evt.args))
+        await evt.sender.locked_connect(
+            auth_token= evt.args[0], csrf_token=evt.args[1]
+        )
+    except Exception as e:
+        evt.sender.command_status = None
+        await evt.reply(f"Failed to log in: {e}")
+        evt.log.exception("Failed to log in")
+        return
+
+    await evt.reply(f"Successfully logged in as @{evt.sender.username}")
+    evt.sender.command_status = None
+
 
 @command_handler(
     needs_auth=True,
