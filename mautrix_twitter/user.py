@@ -141,6 +141,15 @@ class User(DBUser, BaseUser):
             self.poll_cursor = self.client.poll_cursor
         await super().update()
 
+    async def delete(self) -> None:
+        await super().delete()
+        if self.notice_room:
+            await self.az.intent.leave_room(self.notice_room)
+        if self.client:
+            self.client.stop_polling()
+        self.by_mxid.pop(self.mxid, None)
+        self.by_twid.pop(self.twid, None)
+
     # region Connection management
 
     async def is_logged_in(self, ignore_cache: bool = False) -> bool:
@@ -490,6 +499,9 @@ class User(DBUser, BaseUser):
             del self.by_twid[self.twid]
         except KeyError:
             pass
+
+        twid = self.twid
+
         self.client = None
         self._is_logged_in = None
         self.twid = None
@@ -497,6 +509,13 @@ class User(DBUser, BaseUser):
         self.auth_token = None
         self.csrf_token = None
         await self.update()
+        # await self.delete()
+
+        # leave all rooms
+        for portal in await po.Portal.find_chats_of(twid):
+            print("Leaving room ", portal.name, portal.mxid)
+            await self.bridge.az.intent.leave_room(portal.mxid)
+            await portal.delete()
 
     # endregion
     # region Event handlers

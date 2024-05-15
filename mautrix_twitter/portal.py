@@ -15,17 +15,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Awaitable, Literal, NamedTuple, Tuple, cast
-from collections import deque
-from datetime import datetime, timedelta
 import asyncio
 import base64
 import hashlib
 import time
+from collections import deque
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Awaitable, Literal, NamedTuple, cast
 
-from yarl import URL
 import magic
-
 from mautrix.appservice import DOUBLE_PUPPET_SOURCE_KEY, AppService, IntentAPI
 from mautrix.bridge import BasePortal, NotificationDisabler, async_getter_lock
 from mautrix.errors import MatrixError, MForbidden
@@ -57,6 +55,8 @@ from mautrix.types import (
 from mautrix.util import background_task, ffmpeg, variation_selector
 from mautrix.util.message_send_checkpoint import MessageSendCheckpointStatus
 from mautrix.util.simple_lock import SimpleLock
+from yarl import URL
+
 from mautwitdm.errors import UnsupportedAttachmentError
 from mautwitdm.types import (
     Conversation,
@@ -67,7 +67,6 @@ from mautwitdm.types import (
     ReactionCreateEntry,
     VideoVariant,
 )
-
 from . import backfill as b, matrix as m, puppet as p, user as u
 from .config import Config
 from .db import (

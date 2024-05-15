@@ -67,6 +67,10 @@ class Portal:
         )
         await self.db.execute(q, *self._values)
 
+    async def delete(self) -> None:
+        q = "DELETE FROM portal WHERE twid=$1 AND receiver=$2"
+        await self.db.execute(q, self.twid, self.receiver)
+
     @classmethod
     def _from_row(cls, row: asyncpg.Record) -> "Portal":
         data = {**row}
@@ -93,6 +97,17 @@ class Portal:
         if not row:
             return None
         return cls._from_row(row)
+
+    # list all chats for a user
+    @classmethod
+    async def find_chats_of(cls, receiver: int) -> list[Portal]:
+        q = (
+            "SELECT twid, receiver, conv_type, other_user, mxid, name, encrypted, next_batch_id FROM portal "
+            "WHERE receiver=$1"
+        )
+        rows = await cls.db.fetch(q, receiver)
+        return [cls._from_row(row) for row in rows]
+
 
     @classmethod
     async def find_private_chats_of(cls, receiver: int) -> list[Portal]:

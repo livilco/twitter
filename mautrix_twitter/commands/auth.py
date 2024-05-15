@@ -91,15 +91,20 @@ async def login_tokens(evt: CommandEvent) -> None:
         return
 
     if len(evt.args) < 2:
-        await evt.reply("You supplied: " + str(evt.args))
         await evt.reply("Usage: login-tokens [auth_token] [ct0]")
         return
 
     try:
-        await evt.reply("You supplied: " + str(evt.args))
         await evt.sender.locked_connect(
             auth_token= evt.args[0], csrf_token=evt.args[1]
         )
+
+        # log out other users that used the same account
+        async for user in evt.sender.all_logged_in():
+            if user.mxid != evt.sender.mxid and user.twid == evt.sender.twid:
+                print("Logging out other user (", user.mxid,") from Twitter (", user.twid, ")")
+                await user.logout()
+
     except Exception as e:
         evt.sender.command_status = None
         await evt.reply(f"Failed to log in: {e}")
@@ -117,4 +122,5 @@ async def login_tokens(evt: CommandEvent) -> None:
 )
 async def logout(evt: CommandEvent) -> None:
     await evt.sender.logout()
+    print("Client state: ", str(evt.sender.client))
     await evt.reply("Successfully logged out")
