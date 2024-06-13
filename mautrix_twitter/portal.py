@@ -504,6 +504,10 @@ class Portal(DBPortal, BasePortal):
                 converted.append(media_content)
         if message.text and not message.text.isspace():
             text_content = await twitter_to_matrix(message)
+            other_user = await u.User.get_by_twid(int(sender.twid))
+            self.log.debug(f"Found other_user {other_user} for {sender.twid}")
+            if other_user is not None:
+                text_content["mx_sender_id"] = other_user.mxid
             text_content["com.beeper.linkpreviews"] = await self._twitter_preview_to_beeper(
                 source, intent, message
             )
